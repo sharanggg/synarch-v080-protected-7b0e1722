@@ -1,0 +1,14 @@
+name: Fixture CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  fixture-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate synthetic fixture only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/contents/fixture.json?ref=$GITHUB_SHA" --jq .content > encoded
+          python -c "import base64,json; d=json.loads(base64.b64decode(open('encoded').read())); assert 0 <= d['value'] <= 10"
